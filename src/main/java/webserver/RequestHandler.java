@@ -2,6 +2,7 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -24,34 +25,42 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
 
-            //InputStream 한 줄 단위로 읽기
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String line;
-            boolean getUrl = false;
-            String url;
-            System.out.println("=====HTTP요청 값 read start=====");
-            while( (line = br.readLine()) != null ){ // line이 Null인경우 처리
-                if("".equals(line)) break; // 라인 마지막인경우 while문 break
-                if(!getUrl) {
-                    url =  getUrlFromHeader(line);
-                    getUrl = true;
-                }
-                System.out.println(line);
-            }
-            System.out.println("=====HTTP요청 값 end=====");
 
-            DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
-            response200Header(dos, body.length);
-            responseBody(dos, body);
+            String line = br.readLine();
+            if( line==null ) {
+                return;
+            }
+            log.debug("request line : {}", line);
+
+            String[] tokens = line.split(" "); // 첫줄
+
+            while(!"".equals(line)) { // 라인 마지막인경우 while문 break
+                line = br.readLine();
+                log.debug("request line : {}", line);
+            }
+
+            String url = getDefaultUrl(tokens);
+            responseToClient(out, url);
+
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private String getUrlFromHeader(String line){
-        String[] tokens = line.split(" ");
-        return tokens[1];
+    private String getDefaultUrl(String[] tokens){
+        String url = tokens[1];
+        if(url.equals("/")){
+            url = "/index.html";
+        }
+        return url;
+    }
+
+    private void responseToClient(OutputStream out, String url) throws  IOException {
+        DataOutputStream dos = new DataOutputStream(out);
+        byte[] body = Files.readAllBytes( new File("webapp" + url).toPath());
+        response200Header(dos, body.length);
+        responseBody(dos, body);
     }
 
     private String getResponseHeaderDate(){
@@ -64,8 +73,7 @@ public class RequestHandler extends Thread {
         try {
 
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Connection: Keep-Alive");
-            dos.writeBytes("Date: "+getResponseHeaderDate());
+            dos.writeBytes("Date: "+getResponseHeaderDate()+"\r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");

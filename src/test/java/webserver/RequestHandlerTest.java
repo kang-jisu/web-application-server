@@ -3,11 +3,14 @@ package webserver;
 
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Files;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class RequestHandlerTest extends Thread {
 
@@ -23,5 +26,12 @@ public class RequestHandlerTest extends Thread {
         String line = "GET /index.html HTTP/1.1";
         String[] tokens = line.split(" ");
         assertEquals("/index.html", tokens[1]);
+    }
+
+    @Test
+    public void 파일_경로() throws IOException {
+        File file = new File("webapp"+"/index.html");
+        byte[] body = Files.readAllBytes(file.toPath());
+        System.out.write(body);
     }
 }
