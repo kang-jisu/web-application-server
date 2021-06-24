@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -25,22 +26,20 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in,"UTF-8"));
 
             String line = br.readLine();
             if( line==null ) {
                 return;
             }
-            log.debug("request line : {}", line);
 
             String[] tokens = line.split(" "); // 첫줄
 
-            while(!"".equals(line)) { // 라인 마지막인경우 while문 break
-                line = br.readLine();
-                log.debug("request line : {}", line);
-            }
-
-            String url = getDefaultUrl(tokens);
+//            while(!"".equals(line)) { // 라인 마지막인경우 while문 break
+//                line = br.readLine();
+//                log.debug("request line : {}", line);
+//            }
+            String url = HttpRequestUtils.getUrl(line);
             responseToClient(out, url);
 
         } catch (IOException e) {
