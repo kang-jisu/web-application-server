@@ -15,7 +15,22 @@
 * 각 요구사항을 구현하는 것이 중요한 것이 아니라 구현 과정을 통해 학습한 내용을 인식하는 것이 배움에 중요하다. 
 
 ### 요구사항 1 - http://localhost:8080/index.html로 접속시 응답
-* 
+* InputStream , BufferedReader  
+자바에서 Stream의 기본 값은 byte이며 미리 사이즈를 정해서 `byte[] = getBytes()`로 읽어올 수 도있다.   
+  UTF-8에서 한글은 3byte라 한byte씩 읽어오면 깨질 수 있는데 <b>Scanner(InputStreamReader)</b>가 '문자'단위로 읽어들일 수 있게 해준다.   
+  이를 '문자열' 단위로 읽으려면 배열로 선언해야하는데 Buffer를 통해 쌓아둔 뒤 한번에 문자열 처럼 처리할 수 있다.
+  - BufferedReader의 `readLine()`메소드   
+    : 한줄(공백 포함)을 읽어오기 때문에 char 배열 생성 필요 없이 String으로 바로 받을 수 있다.  
+* `Byte[] body = Files.readAllBytes(Path path)  `
+  Path객체 형식으로 넣어주어야 하기 때문에 경로 String값이 아닌  new File(경로).toPath()로 지정해준다.  
+* `log.debug()` 에서 쓰레드 번호, 실행중인 클래스, 값을 다 볼 수 있다.
+
+---
+* 알아볼 것
+
+    - keep-alive
+    - HTTP header 
+    - 요청으로 받은 header값을 어떻게 response에서 사용?하는지 
 
 ### 요구사항 2 - get 방식으로 회원가입
 * 
